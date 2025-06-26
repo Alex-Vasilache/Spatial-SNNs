@@ -1,0 +1,7 @@
+*.pyc
+output/
+*.mp4
+network_run_videos
+*.avi
+.vscode/
+__pycache__/
