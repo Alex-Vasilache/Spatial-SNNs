@@ -130,7 +130,7 @@ class Evolution:
         max_vthr,
         prune_unconnected,
         evolution_method,
-        spatial
+        spatial,
     ):
         self.net_size = np.array(net_size)  # e.g. [3, 3, 3]
         self.vthr_range = [1, 10]
@@ -316,9 +316,9 @@ class Evolution:
             scores
         )  # weights given for each reward when combining them
         weights[0] = 100.0  # reward is the most important
-        weights[-1] = 10.0  # sparsity is the second most important
+        weights[-1] = 0.1  # sparsity is the second most important
         weights[1] = 1.0  # f1 (number of used joints) is the third most important
-        weights[2] = 0.1  # f2 (degree of joint usage) is the least important
+        weights[2] = 10.0  # f2 (degree of joint usage) is the least important
 
         idx, _ = getElites(scores, ascending, weights)
 
@@ -461,8 +461,8 @@ class Evolution:
         def _dist(n1, n2):
             pos2 = get_pos_from_id(n2, self.net_size)
             pos1 = np.copy(pos2)
-            #pos1[0] = self.net_size[0] # place them at the end of the x axis
-            pos1[0] -= 1 # place them at distance 1
+            # pos1[0] = self.net_size[0] # place them at the end of the x axis
+            pos1[0] -= 1  # place them at distance 1
             return dist_func(pos1, pos2) * dist_mult
 
         distance_mat = self._compute_dist_mat(f_neurons, t_neurons, get_dist)

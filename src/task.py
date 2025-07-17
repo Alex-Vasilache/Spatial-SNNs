@@ -44,19 +44,6 @@ class Task:
 
         self.spike_steps = args.spike_steps
 
-        if not hasattr(args, "data_path") or args.data_path is None:
-            self.data_path = "output/"
-            self.data_path = os.path.join(
-                self.data_path,
-                args.game_name + "-" + args.time,
-            )
-        else:
-            self.data_path = args.data_path
-
-        if not args.test:
-            if not (os.path.exists(self.data_path)):
-                os.makedirs(self.data_path)
-
         if args.discretize_intervals in [None, 0, 1]:
             args.discretize_intervals = None
 
@@ -87,10 +74,6 @@ class Task:
         self.inp_feat = self.envs.envs[0].observation_space.shape[0]
 
         self.hid_feat = args.net_size
-
-        if not args.test:
-            with open(os.path.join(self.data_path, "args.txt"), "w") as f:
-                json.dump(args.__dict__, f, indent=2)
 
         self.args = args
         self.net = None
