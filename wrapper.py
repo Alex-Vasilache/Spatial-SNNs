@@ -1,5 +1,5 @@
 import numpy as np
-from util.args import Parser
+from util.config_loader import load_config, create_parser
 from src.train import train
 from src.visualizer import Visualizer
 from threading import Thread
@@ -13,8 +13,23 @@ from scipy.sparse._base import SparseEfficiencyWarning
 warnings.filterwarnings("ignore", category=SparseEfficiencyWarning)
 warnings.filterwarnings("ignore", category=UserWarning)
 
-parser = Parser()
-args = parser.parse_args()
+# Parse command-line arguments for config file and overrides
+parser = create_parser()
+cmd_args = parser.parse_args()
+
+# Load configuration from YAML file with command-line overrides
+args = load_config(
+    config_path=cmd_args.config,
+    override_args={
+        "checkpoint_path": cmd_args.checkpoint_path,
+        "test": cmd_args.test,
+        "random_seed": cmd_args.random_seed,
+        "device": cmd_args.device,
+        "game_name": cmd_args.game_name,
+        "num_iterations": cmd_args.num_iterations,
+    },
+)
+
 np.random.seed(args.random_seed)
 
 
@@ -23,7 +38,7 @@ def main(args):
     Main function to run the training or visualization process.
 
     This function serves as the entry point for the application. It handles
-    command-line arguments to determine whether to run the training process
+    configuration to determine whether to run the training process
     or to visualize a pre-trained agent.
 
     Args:

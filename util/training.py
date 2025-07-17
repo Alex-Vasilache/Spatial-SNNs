@@ -23,7 +23,7 @@ class ProgressBar:
                 desc="Scalars",
                 bar_format="{desc}",
                 position=0,
-                leave=True,
+                leave=False,
             )
             progress_bar_format = (
                 "{desc} {n_fmt:"
@@ -35,7 +35,7 @@ class ProgressBar:
                 desc="Iteration",
                 bar_format=progress_bar_format,
                 position=1,
-                leave=True,
+                leave=False,
             )
         else:
             self.scalar_tracker = None
@@ -52,7 +52,9 @@ class ProgressBar:
         if self.progress_bar is not None:
             if self.scalar_tracker is not None:
                 formatted_scalars = {
-                    key: "{:.3e}".format(value[-1] if isinstance(value, list) else value)
+                    key: "{:.3e}".format(
+                        value[-1] if isinstance(value, list) else value
+                    )
                     for key, value in kwargs.items()
                 }
                 description = (
@@ -66,5 +68,3 @@ class ProgressBar:
                 )[:-2]
                 self.scalar_tracker.set_description(description)
             self.progress_bar.update(_steps)
-
-

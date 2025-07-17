@@ -1,0 +1,54 @@
+# Spatial-SNNs Configuration File
+# Configuration for evolving spatially embedded recurrent spiking neural networks for control tasks
+
+# =================================================================
+# GENERAL CONFIGURATION
+# =================================================================
+general:
+  checkpoint_path: null  # Path to directory containing saved model checkpoint for loading pretrained weights
+  test: false  # Enable test mode: skip training and only run inference/visualization with existing checkpoint
+  random_seed: 0  # Random seed for reproducible experiments (affects network initialization and environment)
+  device: "0"  # Computing device: GPU ID (e.g., '0', '1') or 'cpu' for CPU-only execution
+
+# =================================================================
+# ENVIRONMENT CONFIGURATION
+# =================================================================
+environment:
+  game_name: "CartPole-v1"  # Gymnasium environment name (e.g., 'CartPole-v1', 'Hopper-v4', 'Ant-v4')
+  visualization: true  # Enable real-time visualization of agent performance during training/testing
+  max_env_steps: 500  # Maximum number of environment steps per episode before automatic reset
+  discretize_intervals: 0  # For continuous action spaces: number of discrete intervals per action dimension. Set to 0 or 1 to keep actions continuous
+
+# =================================================================
+# NETWORK ARCHITECTURE
+# =================================================================
+network:
+  net_size: [3, 3, 1]  # 3D grid dimensions for hidden layer neurons: [width, height, depth]. Total hidden neurons = width × height × depth
+  spike_steps: 4  # Number of SNN simulation timesteps per environment step (higher = more temporal dynamics)
+  max_vthr: 1000  # Maximum membrane potential threshold for LIF neurons (controls spiking sensitivity)
+  spatial: true  # Enable spatial embedding: connection probabilities decay with distance in 3D space
+  prune_unconnected: true  # Remove isolated neurons and disconnected subgraphs to improve efficiency
+
+# =================================================================
+# EVOLUTIONARY ALGORITHM PARAMETERS
+# =================================================================
+evolution:
+  num_iterations: 1000  # Total number of evolutionary generations to run
+  num_gene_samples: 100  # Population size: number of individual networks evaluated per generation
+  evolution_method: "classic"  # Evolutionary strategy: 'classic' (standard GA) or 'map_elites' (quality-diversity)
+
+# =================================================================
+# MAP-ELITES SPECIFIC PARAMETERS
+# =================================================================
+map_elites:
+  sigma_bins: 10  # MAP-Elites: Number of bins for first behavioral descriptor (connection strength diversity)
+  sparsity_bins: 10  # MAP-Elites: Number of bins for second behavioral descriptor (network sparsity)
+
+# =================================================================
+# TRAINING AND EVALUATION
+# =================================================================
+training:
+  batch_size_gene: 25  # Number of network configurations to evaluate in parallel on GPU (memory permitting)
+  num_data_samples: 3  # Total number of evaluation episodes per network (higher = more reliable fitness estimate)
+  batch_size_data: 3  # Number of parallel environments to run simultaneously per network evaluation
+  curiculum_learning: false  # Gradually increase episode length by 1.1x every generation for progressive difficulty. Capped at 1000 steps. 

@@ -5,8 +5,6 @@ import time
 import numpy as np
 import json
 from src.search.evolution import Gene, merge_genes
-from src.encoder import SimpleEncoder as Encoder
-from util.scaler import create_scaler
 from gymnasium.wrappers import TimeLimit
 from gymnasium.spaces import Box
 
@@ -26,7 +24,7 @@ class Task:
     and calculates feature descriptors based on their performance.
     """
 
-    def __init__(self, args):
+    def __init__(self, args, env=None):
         """
         Initializes the Task object.
 
@@ -40,21 +38,7 @@ class Task:
         self.num_gene_samples = args.num_gene_samples
         self.num_data_batches = int(self.num_data_samples / self.batch_size_data)
         self.num_gene_batches = int(self.num_gene_samples / self.batch_size_gene)
-        if (
-            args.max_env_steps == -1
-            or args.max_env_steps is None
-            or args.max_env_steps == 0
-        ):
-            self.envs = np.array(
-                [gym.make(args.game_name) for i in range(self.batch_size)]
-            )
-        else:
-            self.envs = np.array(
-                [
-                    gym.make(args.game_name, max_episode_steps=int(args.max_env_steps))
-                    for i in range(self.batch_size)
-                ]
-            )
+        self.envs = env
 
         self.game_name = args.game_name
 
@@ -76,16 +60,19 @@ class Task:
         if args.discretize_intervals in [None, 0, 1]:
             args.discretize_intervals = None
 
-        if isinstance(self.envs[0].action_space, Box):
+        if isinstance(self.envs.envs[0].action_space, Box):
             self.continuous_action_space = True
-            self.out_feat = self.envs[0].action_space.shape[0]
+            self.out_feat = self.envs.envs[0].action_space.shape[0]
             self.action_bounds = np.stack(
-                [self.envs[0].action_space.low, self.envs[0].action_space.high]
+                [
+                    self.envs.envs[0].action_space.low,
+                    self.envs.envs[0].action_space.high,
+                ]
             ).T
 
         else:
             self.continuous_action_space = False
-            self.out_feat = self.envs[0].action_space.n
+            self.out_feat = self.envs.envs[0].action_space.n
             args.discretize_intervals = None
             self.action_bounds = None
 
@@ -97,15 +84,7 @@ class Task:
         self.discretize_intervals = args.discretize_intervals
         self.viz = args.visualization
         self.size = args.net_size
-        self.inp_feat = self.envs[0].observation_space.shape[0]
-
-        scaler = create_scaler(env=self.envs[0])
-
-        self.encoder = Encoder(
-            self.inp_feat,
-            self.batch_size,
-            scaler
-        )
+        self.inp_feat = self.envs.envs[0].observation_space.shape[0]
 
         self.hid_feat = args.net_size
 
@@ -137,12 +116,14 @@ class Task:
                 num_steps=self.args.spike_steps,
                 input_features=self.inp_feat,
                 output_features=self.out_feat,
-                discretize_intervals=self.discretize_intervals
-                if self.discretize_intervals is not None
-                else 0,
+                discretize_intervals=(
+                    self.discretize_intervals
+                    if self.discretize_intervals is not None
+                    else 0
+                ),
                 device=(
                     "cuda:" + str(self.args.device)
-                    if self.args.device is not None
+                    if self.args.device != "cpu"
                     else "cpu"
                 ),
             )
@@ -164,9 +145,7 @@ class Task:
             tuple: A tuple containing the mean rewards, standard deviation of
                    rewards, and a stack of feature descriptors.
         """
-        gene_batches = np.split(
-            np.array(pool, dtype=object), self.num_gene_batches
-        )
+        gene_batches = np.split(np.array(pool, dtype=object), self.num_gene_batches)
         data = np.arange(self.num_data_samples)
         data_batches = np.split(
             np.repeat(data, self.batch_size_gene).reshape(
@@ -245,13 +224,13 @@ class Task:
         ):
             if all(dones) or all(truncs):
                 break
-            step_outputs = self._step(states, (dones or truncs))
+            step_outputs = self._step(states, (dones))
             states, rewards, dones, truncs, sigmoid_actions = (
                 step_outputs[0],
                 step_outputs[1],
                 step_outputs[2],
                 step_outputs[3],
-                step_outputs[4]
+                step_outputs[4],
             )
 
             scores += rewards
@@ -337,12 +316,8 @@ class Task:
         Returns:
             np.ndarray: The initial states of the environments after reset.
         """
-        resets = [
-            env.reset(seed=int(seed * 1000 + self.args.random_seed))
-            for env, seed in zip(self.envs, seeds.flatten())
-        ]
-        states = np.array([r[0] for r in resets])
-        self.encoder.reset(states)
+        resets = [int(seed * 1000 + self.args.random_seed) for seed in seeds.flatten()]
+        states = self.envs.reset(seed=resets)
         return states
 
     def _step(self, states, dones):
@@ -360,9 +335,8 @@ class Task:
             tuple: A tuple containing the next states, rewards, done flags,
                    truncation flags, and the sigmoid actions from the network.
         """
-        norm_states = self.encoder.forward(states)
+        norm_states = states
 
-        norm_states = (norm_states - 0.5) * 5
         t, b, f = self.spike_steps, self.batch_size, self.inp_feat
         input_state = (
             norm_states.reshape(b, f)
@@ -394,33 +368,12 @@ class Task:
         if actions is None or sigmoid_actions is None:
             raise ValueError("Net not initialized or forward pass failed")
 
-        steps = [
-            (
-                (
-                    env.step(action)
-                    if self.continuous_action_space
-                    else env.step(action[0])
-                )
-                if not done
-                else (
-                    states[i],
-                    0.0,
-                    True,
-                    True,
-                    {},
-                )
-            )
-            for (i, env, action, done) in zip(
-                range(self.batch_size),
-                self.envs,
-                actions.reshape(self.batch_size, -1),
-                dones,
-            )
-        ]
-        states = np.array([s[0] for s in steps])
-        rewards = np.array([s[1] for s in steps])
-        dones = [s[2] for s in steps]
-        truncs = [s[3] for s in steps]
+        steps = self.envs.step(actions)  # (states, rewards, dones, truncs, infos)
+
+        states = steps[0]
+        rewards = steps[1]
+        dones = steps[2]
+        truncs = dones
         return (
             states,
             rewards,

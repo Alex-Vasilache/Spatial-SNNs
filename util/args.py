@@ -111,7 +111,7 @@ class Parser:
         self.parser.add_argument(
             "--max_env_steps",
             type=int,
-            default=10,
+            default=500,
             help="Maximum number of environment steps per episode before automatic reset",
         )
 
@@ -132,7 +132,7 @@ class Parser:
             "--net_size",
             nargs="+",
             type=int,
-            default=[8, 8, 1],
+            default=[3, 3, 1],
             help="3D grid dimensions for hidden layer neurons: [width, height, depth]. "
             "Total hidden neurons = width × height × depth",
         )
@@ -140,7 +140,7 @@ class Parser:
         self.parser.add_argument(
             "--spike_steps",
             type=int,
-            default=64,
+            default=4,
             help="Number of SNN simulation timesteps per environment step (higher = more temporal dynamics)",
         )
 
@@ -218,7 +218,7 @@ class Parser:
         self.parser.add_argument(
             "--batch_size_gene",
             type=int,
-            default=100,
+            default=25,
             help="Number of network configurations to evaluate in parallel on GPU (memory permitting)",
         )
 
@@ -242,7 +242,7 @@ class Parser:
             type=str2bool,
             nargs="?",
             const=True,
-            default=True,
+            default=False,
             help="Gradually increase episode length by 1.1x every generation for progressive difficulty. Capped at 1000 steps.",
         )
 
