@@ -129,6 +129,7 @@ python wrapper.py \
 This work, "Evolving Spatially Embedded Recurrent Spiking Neural Networks for Control Tasks," by Alexandru Vasilache, Jona Scholz, Yulia Sandamirskaya, and Jürgen Becker, has been accepted for publication and was presented at the 34th International Conference on Artificial Neural Networks (ICANN 2025), where it received one of the two Best Student Paper Awards.
 
 DOI: https://doi.org/10.1007/978-3-032-04555-3_6 
+
 The full paper is available here: [PDF](https://drive.google.com/file/d/1V5Si801bhVcBfmPYKX1BwtXfi4HO-NY4/view?usp=sharing)
 
 If you use this code in your research, please consider citing our paper.
@@ -305,8 +306,10 @@ If you use this code in your research, please cite:
 @inproceedings{vasilache2025evolving,
   title={Evolving Spatially Embedded Recurrent Spiking Neural Networks for Control Tasks},
   author={Vasilache, Alexandru and Scholz, Jona and Sandamirskaya, Yulia and Becker, J{\"u}rgen},
-  booktitle={34th International Conference on Artificial Neural Networks (ICANN 2025)},
-  year={2025}
+  booktitle={International Conference on Artificial Neural Networks},
+  pages={66--77},
+  year={2025},
+  organization={Springer}
 }
 ```
 
