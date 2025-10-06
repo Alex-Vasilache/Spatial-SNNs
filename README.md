@@ -26,7 +26,7 @@ The following table compares our spatially embedded models to the best performin
     <td align="center"><b>Cartpole</b></td>
   </tr>
   <tr>
-    <td><video src="repo/vid/ant.mp4" autoplay loop muted></td>
+    <td><img src="repo/vid/ant.gif" alt="Ant"></td>
     <td><img src="repo/vid/cartpole.gif" alt="Cartpole"></td>
   </tr>
   <tr>
@@ -34,8 +34,8 @@ The following table compares our spatially embedded models to the best performin
     <td align="center"><b>Hopper</b></td>
   </tr>
   <tr>
-    <td><video src="repo/vid/halfcheetah.mp4" autoplay loop muted></td>
-    <td><video src="repo/vid/hopper.mp4" autoplay loop muted></td>
+    <td><img src="repo/vid/halfcheetah.gif" alt="HalfCheetah"></td>
+    <td><img src="repo/vid/hopper.gif" alt="Hopper"></td>
   </tr>
 </table>
 
