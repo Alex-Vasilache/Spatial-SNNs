@@ -6,6 +6,47 @@ The code implements a framework for evolving Spiking Neural Networks (SNNs) for 
 
 This framework can be used to replicate the experiments presented in the paper and to serve as a basis for further research into designing efficient, spatially embedded SNNs for neuromorphic control.
 
+## Results
+
+The following table compares our spatially embedded models to the best performing models ("expert") from the [Farama-Minari repository](https://huggingface.co/farama-minari), trained with PPO, SAC, and TQC, by analyzing their architectures and weight counts. The "RWN" column indicates the ratio of non-zero weights in the spatial SNN compared to the SOTA model, while "RP" shows the relative performance.
+
+| Environment | SOTA Weights | Spatial Weights | RWN (%) | SOTA Performance | Spatial Performance | RP (%) |
+| ----------- | ------------ | --------------- | ------- | ---------------- | ------------------- | ------ |
+| Swimmer     | 9,408        | 137             | 1.46    | 363.7 ± 1.8      | 361.8 ± 1.7         | 99.48  |
+| Hopper      | 347,392      | 222             | 0.06    | 4098.2 ± 247.7   | 2706.1 ± 73.7       | 66.03  |
+| HalfCheetah | 384,256      | 703             | 0.18    | 17641.8 ± 61.9   | 3670.4 ± 1198.3     | 20.81  |
+| Walker2d    | 359,680      | 694             | 0.19    | 6956.6 ± 15.9    | 2492.0 ± 247.7      | 35.82  |
+| Ant         | 475,392      | 1,208           | 0.25    | 5846.3 ± 138.5   | 1346.8 ± 35.1       | 23.04  |
+
+## Demonstrations
+
+<table>
+  <tr>
+    <td align="center"><b>Ant</b></td>
+    <td align="center"><b>Cartpole</b></td>
+  </tr>
+  <tr>
+    <td><video src="repo/vid/ant.mp4" autoplay loop muted></td>
+    <td><img src="repo/vid/cartpole.gif" alt="Cartpole"></td>
+  </tr>
+  <tr>
+    <td align="center"><b>HalfCheetah</b></td>
+    <td align="center"><b>Hopper</b></td>
+  </tr>
+  <tr>
+    <td><video src="repo/vid/halfcheetah.mp4" autoplay loop muted></td>
+    <td><video src="repo/vid/hopper.mp4" autoplay loop muted></td>
+  </tr>
+</table>
+
+A version of the code in this repository was adapted to evolve a neuromorphic controller for a physical inverted pendulum. The following video demonstrates the resulting SNN controller successfully performing the swing-up and balancing task in a real-world setting:
+
+<p align="center">
+  <img src="repo/vid/real_cartpole.gif" alt="Real-World Cartpole Demonstration">
+</p>
+
+Full video available on [YouTube](https://www.youtube.com/watch?v=Y0yKGLlRkW4).
+
 ## Installation
 
 To get started, first install the required system packages, then set up a Python virtual environment and install the Python dependencies.
@@ -105,40 +146,38 @@ python wrapper.py \
 
 **Argument Explanations:**
 
-| Argument | Value | Description |
-| :--- | :--- | :--- |
-| `game_name` | `CartPole-v1` | The name of the Gymnasium environment to use. |
-| `discretize_intervals` | `0` | Disables discretization for continuous action spaces, treating them as continuous. |
-| `net_size` | `8 8 1` | Defines the dimensions of the hidden neuron grid (8x8x1). |
-| `num_gene_samples` | `100` | The total population size for each generation. |
-| `batch_size_gene` | `100` | Number of networks to evaluate in parallel on the GPU. |
-| `spike_steps` | `4` | Number of simulation steps for the SNN per environment step. |
-| `num_iterations` | `1000` | The total number of generations to run the evolution for. |
-| `batch_size_data` | `3` | Number of parallel environments for evaluating each network. |
-| `num_data_samples` | `3` | Total number of evaluation rollouts for each network. |
-| `visualization` | `True` | Enables live visualization of the agent's performance. |
-| `random_seed` | `0` | The random seed for reproducibility. |
-| `max_vthr` | `1000` | Maximum membrane potential threshold for the LIF neurons. |
-| `max_env_steps` | `1000` | Maximum number of steps per episode. |
-| `curiculum_learning`| `False` | Disables curriculum learning (gradual difficulty increase). |
-| `prune_unconnected` | `True` | Enables pruning of unconnected neurons. |
-| `evolution_method` | `classic` | Uses a classic evolutionary algorithm (as opposed to MAP-Elites). |
+| Argument               | Value         | Description                                                                        |
+| :--------------------- | :------------ | :--------------------------------------------------------------------------------- |
+| `game_name`            | `CartPole-v1` | The name of the Gymnasium environment to use.                                      |
+| `discretize_intervals` | `0`           | Disables discretization for continuous action spaces, treating them as continuous. |
+| `net_size`             | `8 8 1`       | Defines the dimensions of the hidden neuron grid (8x8x1).                          |
+| `num_gene_samples`     | `100`         | The total population size for each generation.                                     |
+| `batch_size_gene`      | `100`         | Number of networks to evaluate in parallel on the GPU.                             |
+| `spike_steps`          | `4`           | Number of simulation steps for the SNN per environment step.                       |
+| `num_iterations`       | `1000`        | The total number of generations to run the evolution for.                          |
+| `batch_size_data`      | `3`           | Number of parallel environments for evaluating each network.                       |
+| `num_data_samples`     | `3`           | Total number of evaluation rollouts for each network.                              |
+| `visualization`        | `True`        | Enables live visualization of the agent's performance.                             |
+| `random_seed`          | `0`           | The random seed for reproducibility.                                               |
+| `max_vthr`             | `1000`        | Maximum membrane potential threshold for the LIF neurons.                          |
+| `max_env_steps`        | `1000`        | Maximum number of steps per episode.                                               |
+| `curiculum_learning`   | `False`       | Disables curriculum learning (gradual difficulty increase).                        |
+| `prune_unconnected`    | `True`        | Enables pruning of unconnected neurons.                                            |
+| `evolution_method`     | `classic`     | Uses a classic evolutionary algorithm (as opposed to MAP-Elites).                  |
 
 ## Publication
 
 This work, "Evolving Spatially Embedded Recurrent Spiking Neural Networks for Control Tasks," by Alexandru Vasilache, Jona Scholz, Yulia Sandamirskaya, and Jürgen Becker, has been accepted for publication and was presented at the 34th International Conference on Artificial Neural Networks (ICANN 2025), where it received one of the two Best Student Paper Awards.
+
+<p align="center">
+  <img src="repo/img/best_paper_scan.png" alt="Best Paper Award Certificate" width="500"/>
+</p>
 
 DOI: https://doi.org/10.1007/978-3-032-04555-3_6 
 
 The full paper is available here: [PDF](https://drive.google.com/file/d/1V5Si801bhVcBfmPYKX1BwtXfi4HO-NY4/view?usp=sharing)
 
 If you use this code in your research, please consider citing our paper.
-
-## Demonstration
-
-A version of the code in this repository was adapted to evolve a neuromorphic controller for a physical inverted pendulum. The following video demonstrates the resulting SNN controller successfully performing the swing-up and balancing task in a real-world setting:
-
-[Neuromorphic Control: Inverted Pendulum Swing-Up & Balancing](https://www.youtube.com/watch?v=Y0yKGLlRkW4&ab_channel=AlexandruVasilache)
 
 ---
 
