@@ -47,6 +47,22 @@ A version of the code in this repository was adapted to evolve a neuromorphic co
 
 Full video available on [YouTube](https://www.youtube.com/watch?v=Y0yKGLlRkW4).
 
+## Methods
+
+Our framework evolves Spiking Neural Networks (SNNs) for continuous control tasks using a genetic algorithm. The core idea is to embed the neurons in a 3D space, where the connection probabilities and strengths are influenced by the distance between them. This encourages the evolution of efficient, spatially organized networks.
+
+<p align="center">
+  <img src="repo/img/evolution_concept_v3.png" alt="Evolution Concept">
+</p>
+
+The SNNs are composed of Leaky Integrate-and-Fire (LIF) neurons and are trained to control agents in various Gymnasium environments. The network's connectivity is determined by the Euclidean distance between neurons, promoting local connections.
+
+<p align="center">
+  <img src="repo/img/combined_networks.png" alt="Network Architectures">
+</p>
+
+The evolutionary process starts with a population of randomly initialized networks. In each generation, the networks are evaluated, and the best-performing individuals are selected to produce offspring through crossover and mutation. This process iteratively refines the SNNs, leading to specialized and efficient controllers.
+
 ## Installation
 
 To get started, first install the required system packages, then set up a Python virtual environment and install the Python dependencies.
