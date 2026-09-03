@@ -371,4 +371,4 @@ If you use this code in your research, please cite:
 ### Contact
 
 For questions or issues regarding this code, please contact:
-- Alexandru Vasilache: vasilache@fzi.de
+- Alexandru Vasilache: alexandru.vasilache.ai@gmail.com
